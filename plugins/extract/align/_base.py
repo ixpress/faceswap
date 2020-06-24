@@ -50,12 +50,13 @@ class Aligner(Extractor):  # pylint:disable=abstract-method
     """
 
     def __init__(self, git_model_id=None, model_filename=None,
-                 configfile=None, normalize_method=None):
+                 configfile=None, instance=0, normalize_method=None):
         logger.debug("Initializing %s: (normalize_method: %s)", self.__class__.__name__,
                      normalize_method)
         super().__init__(git_model_id,
                          model_filename,
-                         configfile=configfile)
+                         configfile=configfile,
+                         instance=instance)
         self._normalize_method = None
         self.set_normalize_method(normalize_method)
 
@@ -125,7 +126,7 @@ class Aligner(Extractor):  # pylint:disable=abstract-method
                 self._queues["out"].put(item)
                 continue
 
-            converted_image = item.get_image_copy(self.colorformat)
+            converted_image = item.get_image_copy(self.color_format)
             for f_idx, face in enumerate(item.detected_faces):
                 batch.setdefault("image", []).append(converted_image)
                 batch.setdefault("detected_faces", []).append(face)
@@ -219,7 +220,7 @@ class Aligner(Extractor):  # pylint:disable=abstract-method
     def _normalize_faces(self, faces):
         """ Normalizes the face for feeding into model
 
-        The normalization method is dictated by the command line argument `-nh (--normalization)`
+        The normalization method is dictated by the normalization command line argument
         """
         if self._normalize_method is None:
             return faces
